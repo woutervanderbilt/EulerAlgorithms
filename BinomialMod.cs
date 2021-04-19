@@ -35,6 +35,19 @@ namespace Algorithms
 
             var intN = (int) n;
             var intK = (int) k;
+            UpdateFactorial(intN);
+
+            return factorials[intN] * inverseFactorials[intK] % Mod * inverseFactorials[intN- intK] % Mod;
+        }
+
+        public long Factorial(int n)
+        {
+            UpdateFactorial(n);
+            return factorials[n];
+        }
+
+        private void UpdateFactorial(int n)
+        {
             if (n > maxFactorial)
             {
                 var lastFactorial = factorials[maxFactorial];
@@ -45,12 +58,9 @@ namespace Algorithms
                     inverseFactorials.Add(new ResidueClass(lastFactorial, Mod).Inverse().Value);
                 }
 
-                maxFactorial = intN;
+                maxFactorial = n;
             }
-
-            return factorials[intN] * inverseFactorials[intK] % Mod * inverseFactorials[intN- intK] % Mod;
         }
-
 
     }
 }

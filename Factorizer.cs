@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Algorithms.Models;
 
 namespace Algorithms
 {
@@ -193,7 +194,29 @@ namespace Algorithms
             return result;
         }
 
+        public long PrimitiveRoot(long p)
+        {
+            for (long r = 2; r < p; r++)
+            {
+                bool isPrimitiveRoot = true;
+                foreach (var factor in Factor(Totient(p)))
+                {
+                    var res = new ResidueClass(r, p).ToThePower((p - 1) / factor.Item1);
+                    if (res.Value == 1)
+                    {
+                        isPrimitiveRoot = false;
+                        break;
+                    }
+                }
 
+                if (isPrimitiveRoot)
+                {
+                    return r;
+                }
+            }
+
+            return 0;
+        }
 
         public long Rad(long l)
         {

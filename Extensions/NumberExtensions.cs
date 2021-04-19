@@ -266,5 +266,14 @@ namespace Algorithms.Extensions
             return current;
         }
 
+        public static bool IsCoprimeWith(this int a, int b)
+        {
+            return EulerMath.GCD(a, b) == 1;
+        }
+
+        public static bool IsCoprimeWith(this long a, long b)
+        {
+            return EulerMath.GCD(a, b) == 1;
+        }
     }
 }
