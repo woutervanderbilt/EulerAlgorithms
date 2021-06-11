@@ -9,6 +9,22 @@ namespace Algorithms
 {
     public static class EulerMath
     {
+        public static long GCD(long a, long b, params long[] c)
+        {
+            long gcd = GCD(a, b);
+            foreach (var l in c)
+            {
+                if (gcd == 1)
+                {
+                    return 1;
+                }
+
+                gcd = GCD(gcd, l);
+            }
+
+            return gcd;
+        }
+
         public static long GCD(long a, long b)
         {
             if (a < 0)
