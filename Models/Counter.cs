@@ -137,8 +137,8 @@ namespace Algorithms.Models
             }
         }
 
-        public IEnumerable<T> Keys => counts.Keys;
-        public IEnumerable<double> Values => counts.Values;
+        public ICollection<T> Keys => counts.Keys;
+        public ICollection<double> Values => counts.Values;
     }
 
     public class CounterDecimal<T>

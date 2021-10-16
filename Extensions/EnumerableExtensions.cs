@@ -68,5 +68,15 @@ namespace Algorithms.Extensions
                 yield return subset;
             }
         }
+
+        public static long Product(this IEnumerable<long> list)
+        {
+            return list.Aggregate(1l, (a, b) => a * b);
+        }
+
+        public static long Product(this IEnumerable<long> list, long modulus)
+        {
+            return list.Aggregate(1L, (a, b) => a * b % modulus);
+        }
     }
 }

@@ -7,14 +7,16 @@ namespace Algorithms.Models
 {
     public class Polynomial
     {
-        private int Mod { get; }
+        private long Mod { get; }
+        public int? MaxPower { get; }
 
         private IList<long> coefficients;
 
-        public Polynomial(IList<long> coefficients, int mod)
+        public Polynomial(IList<long> coefficients, long mod, int? maxPower = null)
         {
             this.coefficients = coefficients;
             Mod = mod;
+            MaxPower = maxPower;
         }
 
         public int Degree => coefficients.Count - 1;
@@ -28,7 +30,11 @@ namespace Algorithms.Models
                 newCoefficients.Add(0);
             }
             newCoefficients.AddRange(coefficients);
-            return new Polynomial(newCoefficients, Mod);
+            if (MaxPower.HasValue)
+            {
+                newCoefficients = newCoefficients.Take(MaxPower.Value + 1).ToList();
+            }
+            return new Polynomial(newCoefficients, Mod, MaxPower);
         }
 
         public static Polynomial operator +(Polynomial l, Polynomial r)
@@ -96,10 +102,18 @@ namespace Algorithms.Models
                 }
             }
 
+            if (l.MaxPower.HasValue)
+            {
+                product = product.Take(l.MaxPower.Value + 1).ToList();
+            }
 
-            return new Polynomial(product, l.Mod);
+            return new Polynomial(product, l.Mod, l.MaxPower);
         }
 
+        public static Polynomial operator *(long l, Polynomial p)
+        {
+            return p * new Polynomial(new List<long> { l }, p.Mod);
+        }
 
         public override string ToString()
         {

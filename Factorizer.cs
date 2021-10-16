@@ -46,7 +46,7 @@ namespace Algorithms
             isInitialized = true;
         }
 
-        public IEnumerable<Tuple<long, short>> Factor(long l)
+        public IEnumerable<(long, short)> Factor(long l)
         {
             if (!isInitialized)
             {
@@ -61,7 +61,7 @@ namespace Algorithms
 
             if (e > 0)
             {
-                yield return new Tuple<long, short>(2, e);
+                yield return (2, e);
             }
             foreach (var tuple in FactorizeInternal(l))
             {
@@ -69,7 +69,7 @@ namespace Algorithms
             }
         }
 
-        private IEnumerable<Tuple<long, short>> FactorizeInternal(long l, int startPrimeIndex = 0)
+        private IEnumerable<(long, short)> FactorizeInternal(long l, int startPrimeIndex = 0)
         {
             if (l == 1)
             {
@@ -83,7 +83,7 @@ namespace Algorithms
                     var prime = primes[i];
                     if (prime * prime > l)
                     {
-                        yield return new Tuple<long, short>(l, 1);
+                        yield return (l, 1);
                         yield break;
                     }
                     short exp = 0;
@@ -95,7 +95,7 @@ namespace Algorithms
 
                     if (exp > 0)
                     {
-                        yield return new Tuple<long, short>(prime, exp);
+                        yield return (prime, exp);
                         foreach (var tuple in FactorizeInternal(l, i))
                         {
                             yield return tuple;
@@ -114,7 +114,7 @@ namespace Algorithms
                 l /= p;
                 if (l == 1)
                 {
-                    yield return new Tuple<long, short>(p, e);
+                    yield return (p, e);
                     yield break;
                 }
 
@@ -125,7 +125,7 @@ namespace Algorithms
                 }
                 else
                 {
-                    yield return new Tuple<long, short>(p, e);
+                    yield return (p, e);
                     p = q;
                     e = 1;
                 }
@@ -229,7 +229,7 @@ namespace Algorithms
             return rad;
         }
 
-        private IEnumerable<long> DivisorsInternal(long f, List<Tuple<long, short>> factors)
+        private IEnumerable<long> DivisorsInternal(long f, List<(long, short)> factors)
         {
             if (!factors.Any())
             {

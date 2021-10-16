@@ -79,6 +79,17 @@ namespace Algorithms
             return GCD(a, b % a);
         }
 
+        public static long LCM(long a, long b, params long[] c)
+        {
+            long lcm = LCM(a, b);
+            foreach (var l in c)
+            {
+                lcm = LCM(lcm, l);
+            }
+
+            return lcm;
+        }
+
         public static long LCM(long a, long b)
         {
             return a / GCD(a, b) * b;
@@ -155,6 +166,17 @@ namespace Algorithms
         {
             var d = Math.Sqrt(b * b - 4 * a * c);
             return ((-b + d) / (2 * a), (-b - d) / (2 * a));
+        }
+
+        public static int Max(int a, int b, params int[] rest)
+        {
+            var max = Math.Max(a, b);
+            foreach (var r in rest)
+            {
+                max = Math.Max(max, r);
+            }
+
+            return max;
         }
     }
 }
