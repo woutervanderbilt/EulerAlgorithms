@@ -149,6 +149,11 @@ namespace Algorithms
             return (xn, yn, b);
         }
 
+        public static BigInteger LCM(BigInteger a, BigInteger b)
+        {
+            return a / GCD(a, b) * b;
+        }
+
         public static long NumberOfFactors(long n, long p)
         {
             long result = 0;

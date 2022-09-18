@@ -33,6 +33,11 @@ namespace Algorithms
                 return Binomial(n / Mod, k / Mod) * Binomial(n % Mod, k % Mod) % Mod;
             }
 
+            if (n == k || k == 0)
+            {
+                return 1;
+            }
+
             var intN = (int) n;
             var intK = (int) k;
             UpdateFactorial(intN);

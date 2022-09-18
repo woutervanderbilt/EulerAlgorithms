@@ -9,7 +9,7 @@ namespace Algorithms.Extensions
 {
     public static class NumberExtensions
     {
-        public static IList<IList<int>> Partitions(this int n)
+        public static IList<IList<int>> Partitions(this int n, int? maxNumberOfParts = null)
         {
             var cache = new Dictionary<(int,int), IList<IList<int>>>();
 
@@ -201,21 +201,14 @@ namespace Algorithms.Extensions
 
         public static IEnumerable<int> Digits(this long l, int numberBase = 10)
         {
-            var reverse = l.Reverse(numberBase);
-            long yielded = 0;
-            while (reverse > 0)
+            return ReversedDigits().Reverse();
+            IEnumerable<int> ReversedDigits()
             {
-                var toYield = (int) (reverse % numberBase);
-                yield return toYield;
-                yielded *= numberBase;
-                yielded += toYield;
-                reverse /= numberBase;
-            }
-
-            while (yielded != l)
-            {
-                yield return 0;
-                yielded *= numberBase;
+                while (l > 0)
+                {
+                    yield return (int)(l % numberBase);
+                    l /= numberBase;
+                }
             }
         }
 
@@ -241,6 +234,10 @@ namespace Algorithms.Extensions
 
         public static short Valuation(this long l, long p)
         {
+            if (l == 0)
+            {
+                return 0;
+            }
             short v = 0;
             while (l % p == 0)
             {
@@ -274,6 +271,24 @@ namespace Algorithms.Extensions
         public static bool IsCoprimeWith(this long a, long b)
         {
             return EulerMath.GCD(a, b) == 1;
+        }
+
+        public static string ToBaseN(this long l, long n)
+        {
+            var sb = new StringBuilder();
+            bool first = true;
+            while (l > 0)
+            {
+                if (!first && n > 9)
+                {
+                    sb.Insert(0, '.');
+                }
+                sb.Insert(0, l % n);
+                l /= n;
+                first = false;
+            }
+
+            return sb.ToString();
         }
     }
 }

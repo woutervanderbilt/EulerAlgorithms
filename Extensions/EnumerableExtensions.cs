@@ -8,6 +8,11 @@ namespace Algorithms.Extensions
 {
     public static class EnumerableExtensions
     {
+        public static IEnumerable<T> WrapInEnumerable<T>(this T item)
+        {
+            yield return item;
+        }
+
         public static IEnumerable<IEnumerable<T>> Permutations<T>(this IEnumerable<T> source)
         {
             var list = source.ToList();
