@@ -1,164 +1,172 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms.Models
+namespace Algorithms.Models;
+
+public class SquareMatrix<T> : Matrix<T> where T : struct, INumber<T>
 {
-    public class SquareMatrix : Matrix
+    public SquareMatrix(int size, T? modulus = null) : base(size, size, modulus)
     {
-        public SquareMatrix(int size, long? modulus = null) : base(size, size, modulus)
+    }
+
+    public static SquareMatrix<T> Identity(int size, T? modulus = null)
+    {
+        var result = new SquareMatrix<T>(size, modulus);
+        for (int i = 0; i < size; i++)
         {
+            result[i, i] = T.One;
         }
 
-        public static SquareMatrix Identity(int size, long? modulus)
-        {
-            var result = new SquareMatrix(size, modulus);
-            for (int i = 0; i < size; i++)
-            {
-                result[i, i] = 1;
-            }
+        return result;
+    }
 
-            return result;
+    public SquareMatrix<T> ToThePower(long e)
+    {
+        if (e == 0)
+        {
+            return Identity(NumberOfColumns, Modulus);
         }
-
-        public SquareMatrix PowerMod(long e)
+        SquareMatrix<T> result = null;
+        SquareMatrix<T> currentPower = this;
+        while (e > 0)
         {
-            if (e == 0)
+            if (e % 2 == 1)
             {
-                return Identity(NumberOfColumns, Modulus);
-            }
-            SquareMatrix result = null;
-            SquareMatrix currentPower = this;
-            while (e > 0)
-            {
-                if (e % 2 == 1)
+                if (result == null)
                 {
-                    if (result == null)
-                    {
-                        result = currentPower;
-                    }
-                    else
-                    {
-                        result = (SquareMatrix)result.Times(currentPower);
-                    }
+                    result = currentPower;
                 }
-
-                currentPower = (SquareMatrix) currentPower.Times(currentPower);
-                e /= 2;
+                else
+                {
+                    result = (SquareMatrix<T>)result.Times(currentPower);
+                }
             }
 
-            return result;
+            currentPower = (SquareMatrix<T>) currentPower.Times(currentPower);
+            e /= 2;
         }
 
-        public SquareMatrix Inverse()
+        return result;
+    }
+
+    public SquareMatrix<T> Inverse()
+    {
+        if (Modulus == null)
         {
-            if (Modulus == null)
+            throw new Exception("Modulus is null");
+        }
+        IList<IList<T>> oldMatrix = new List<IList<T>>();
+        IList<IList<T>> newMatrix = new List<IList<T>>();
+        for (int r = 0; r < NumberOfColumns; r++)
+        {
+            IList<T> oldRow = new List<T>();
+            IList<T> newRow = new List<T>();
+            for (int c = 0; c < NumberOfColumns; c++)
             {
-                throw new Exception("Modulus is null");
+                newRow.Add(c == r ? T.One : T.Zero);
+                oldRow.Add(this[r, c]);
             }
-            IList<IList<long>> oldMatrix = new List<IList<long>>();
-            IList<IList<long>> newMatrix = new List<IList<long>>();
-            for (int r = 0; r < NumberOfColumns; r++)
+            oldMatrix.Add(oldRow);
+            newMatrix.Add(newRow);
+        }
+
+        for (int i = 0; i < NumberOfColumns; i++)
+        {
+            int j = i;
+            while (oldMatrix[i][i] == T.Zero)
             {
-                IList<long> oldRow = new List<long>();
-                IList<long> newRow = new List<long>();
-                for (int c = 0; c < NumberOfColumns; c++)
-                {
-                    newRow.Add(c == r ? 1 : 0);
-                    oldRow.Add(this[r, c]);
-                }
-                oldMatrix.Add(oldRow);
-                newMatrix.Add(newRow);
+                j++;
             }
 
+            if (j != i)
+            {
+                MoveRow(j, i);
+            }
+
+            if (Modulus.HasValue)
+            {
+                ScalarMultiplyRow(i, new ResidueClass<T>(oldMatrix[i][i], Modulus.Value).Inverse().Value);
+            }
+            else
+            {
+                ScalarMultiplyRow(i, T.One/oldMatrix[i][i]);
+            }
+
+            for (int k = i + 1; k < NumberOfColumns; k++)
+            {
+                if (oldMatrix[k][i] != T.Zero)
+                {
+                    AddNthRowKTimesToMthRow(i, k, -oldMatrix[k][i]);
+                }
+            }
+        }
+
+
+        for (int i = NumberOfColumns - 1; i >= 0; i--)
+        {
+            for (int k = i - 1; k >= 0; k--)
+            {
+                if (oldMatrix[k][i] != T.Zero)
+                {
+                    AddNthRowKTimesToMthRow(i, k, -oldMatrix[k][i]);
+                }
+            }
+        }
+
+
+
+
+
+        var result = new SquareMatrix<T>(NumberOfColumns);
+        for (int r = 0; r < NumberOfColumns; r++)
+        {
+            for (int c = 0; c < NumberOfColumns; c++)
+            {
+                result[r, c] = newMatrix[r][c];
+            }
+        }
+
+        return result;
+
+        void MoveRow(int from, int to)
+        {
+            var oldRowToMove = oldMatrix[from];
+            oldMatrix.Insert(to, oldRowToMove);
+            oldMatrix.RemoveAt(from + (to <= from ? 1 : 0));
+
+            var newRoTowMove = newMatrix[from];
+            newMatrix.Insert(to, newRoTowMove);
+            newMatrix.RemoveAt(from + (to <= from ? 1 : 0));
+        }
+
+        void AddNthRowKTimesToMthRow(int n, int m, T k)
+        {
+            var oldNthRow = oldMatrix[n];
+            var oldMthRow = oldMatrix[m];
+            var newNthRow = newMatrix[n];
+            var newMthRow = newMatrix[m];
             for (int i = 0; i < NumberOfColumns; i++)
             {
-                int j = i;
-                while (oldMatrix[i][i] == 0)
-                {
-                    j++;
-                }
-
-                if (j != i)
-                {
-                    MoveRow(j, i);
-                }
-                ScalarMultiplyRow(i, new ResidueClass(oldMatrix[i][i], Modulus.Value).Inverse().Value);
-
-                for (int k = i + 1; k < NumberOfColumns; k++)
-                {
-                    if (oldMatrix[k][i] != 0)
-                    {
-                        AddNthRowKTimesToMthRow(i, k, -oldMatrix[k][i]);
-                    }
-                }
+                oldMthRow[i] = (oldMthRow[i] + k * oldNthRow[i]) % Modulus.Value;
+                newMthRow[i] = (newMthRow[i] + k * newNthRow[i]) % Modulus.Value;
             }
+        }
 
-
-            for (int i = NumberOfColumns - 1; i >= 0; i--)
+        void ScalarMultiplyRow(int n, T k)
+        {
+            var oldRow = oldMatrix[n];
+            var newRow = newMatrix[n];
+            for (int c = 0; c < NumberOfColumns; c++)
             {
-                for (int k = i - 1; k >= 0; k--)
-                {
-                    if (oldMatrix[k][i] != 0)
-                    {
-                        AddNthRowKTimesToMthRow(i, k, -oldMatrix[k][i]);
-                    }
-                }
+                oldRow[c] = oldRow[c] * k % Modulus.Value;
+                newRow[c] = newRow[c] * k % Modulus.Value;
             }
-
-
-
-
-
-            var result = new SquareMatrix(NumberOfColumns);
-            for (int r = 0; r < NumberOfColumns; r++)
-            {
-                for (int c = 0; c < NumberOfColumns; c++)
-                {
-                    result[r, c] = newMatrix[r][c];
-                }
-            }
-
-            return result;
-
-            void MoveRow(int from, int to)
-            {
-                var oldRowToMove = oldMatrix[from];
-                oldMatrix.Insert(to, oldRowToMove);
-                oldMatrix.RemoveAt(from + (to <= from ? 1 : 0));
-
-                var newRoTowMove = newMatrix[from];
-                newMatrix.Insert(to, newRoTowMove);
-                newMatrix.RemoveAt(from + (to <= from ? 1 : 0));
-            }
-
-            void AddNthRowKTimesToMthRow(int n, int m, long k)
-            {
-                var oldNthRow = oldMatrix[n];
-                var oldMthRow = oldMatrix[m];
-                var newNthRow = newMatrix[n];
-                var newMthRow = newMatrix[m];
-                for (int i = 0; i < NumberOfColumns; i++)
-                {
-                    oldMthRow[i] = (oldMthRow[i] + k * oldNthRow[i]) % Modulus.Value;
-                    newMthRow[i] = (newMthRow[i] + k * newNthRow[i]) % Modulus.Value;
-                }
-            }
-
-            void ScalarMultiplyRow(int n, long k)
-            {
-                var oldRow = oldMatrix[n];
-                var newRow = newMatrix[n];
-                for (int c = 0; c < NumberOfColumns; c++)
-                {
-                    oldRow[c] = oldRow[c] * k % Modulus.Value;
-                    newRow[c] = newRow[c] * k % Modulus.Value;
-                }
-            }
-
         }
 
     }
+
 }

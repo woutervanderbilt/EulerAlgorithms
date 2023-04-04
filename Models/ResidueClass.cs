@@ -1,132 +1,140 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms.Models
+namespace Algorithms.Models;
+
+public struct ResidueClass<T> where T : struct, INumber<T>
 {
-    public class ResidueClass
+    private static T two = T.One + T.One;
+
+    public ResidueClass(T value, T modulus)
     {
-        public ResidueClass(long value, long modulus)
-        {
-            Value = value % modulus + (value < 0 ? modulus : 0);
-            Modulus = modulus;
-        }
-        public long Value { get; set; }
-        public long Modulus { get; set; }
+        Value = value % modulus + (value < T.Zero ? modulus : T.Zero);
+        Modulus = modulus;
+    }
+    public T Value { get; set; }
+    public T Modulus { get; set; }
 
-        public static ResidueClass operator +(ResidueClass l, ResidueClass r)
+    public static ResidueClass<T> operator +(ResidueClass<T> l, ResidueClass<T> r)
+    {
+        if(l.Modulus != r.Modulus)
         {
-            if(l.Modulus != r.Modulus)
+            throw new ArgumentException("Moduli komen niet overen", nameof(l));
+        }
+        return new ResidueClass<T>(l.Value + r.Value, l.Modulus);
+    }
+
+    public static ResidueClass<T> operator *(ResidueClass<T> l, ResidueClass<T> r)
+    {
+        if (l.Modulus != r.Modulus)
+        {
+            throw new ArgumentException("Moduli komen niet overen", nameof(l));
+        }
+        return new ResidueClass<T>(l.Value * r.Value, l.Modulus);
+    }
+
+    public static ResidueClass<T> operator -(ResidueClass<T> r)
+    {
+        return new ResidueClass<T>(r.Modulus - r.Value, r.Modulus);
+    }
+
+    public static ResidueClass<T> operator -(ResidueClass<T> l, ResidueClass<T> r)
+    {
+        if (l.Modulus != r.Modulus)
+        {
+            throw new ArgumentException("Moduli komen niet overen", nameof(l));
+        }
+        return new ResidueClass<T>(l.Value -r.Value, l.Modulus);
+    }
+
+    public static ResidueClass<T> operator +(ResidueClass<T> l, T r)
+    {
+        return new ResidueClass<T>(l.Value + (r % l.Modulus), l.Modulus);
+    }
+
+    public static ResidueClass<T> operator -(ResidueClass<T> l, T r)
+    {
+        return new ResidueClass<T>(l.Value - (r % l.Modulus), l.Modulus);
+    }
+    public static ResidueClass<T> operator *(ResidueClass<T> l, T r)
+    {
+        return new ResidueClass<T>(l.Value * (r % l.Modulus), l.Modulus);
+    }
+
+    public static ResidueClass<T> operator ++(ResidueClass<T> l)
+    {
+        return new ResidueClass<T>(l.Value + T.One, l.Modulus);
+    }
+
+    public static ResidueClass<T> operator --(ResidueClass<T> l)
+    {
+        return new ResidueClass<T>(l.Value - T.One, l.Modulus);
+    }
+
+    public ResidueClass<T> ToThePower(T n)
+    {
+        T result = T.One;
+        T currentPower = Value;
+        while (n > T.Zero)
+        {
+            if (n % two == T.One)
             {
-                throw new ArgumentException("Moduli komen niet overen", nameof(l));
-            }
-            return new ResidueClass(l.Value + r.Value, l.Modulus);
-        }
-
-        public static ResidueClass operator *(ResidueClass l, ResidueClass r)
-        {
-            if (l.Modulus != r.Modulus)
-            {
-                throw new ArgumentException("Moduli komen niet overen", nameof(l));
-            }
-            return new ResidueClass(l.Value * r.Value, l.Modulus);
-        }
-
-        public static ResidueClass operator -(ResidueClass r)
-        {
-            return new ResidueClass(r.Modulus - r.Value, r.Modulus);
-        }
-
-        public static ResidueClass operator -(ResidueClass l, ResidueClass r)
-        {
-            if (l.Modulus != r.Modulus)
-            {
-                throw new ArgumentException("Moduli komen niet overen", nameof(l));
-            }
-            return new ResidueClass(l.Value -r.Value, l.Modulus);
-        }
-
-        public static ResidueClass operator +(ResidueClass l, long r)
-        {
-            return new ResidueClass(l.Value + (r % l.Modulus), l.Modulus);
-        }
-
-        public static ResidueClass operator -(ResidueClass l, long r)
-        {
-            return new ResidueClass(l.Value - (r % l.Modulus), l.Modulus);
-        }
-        public static ResidueClass operator *(ResidueClass l, long r)
-        {
-            return new ResidueClass(l.Value * (r % l.Modulus), l.Modulus);
-        }
-
-        public static ResidueClass operator ++(ResidueClass l)
-        {
-            return new ResidueClass(l.Value + 1, l.Modulus);
-        }
-
-        public static ResidueClass operator --(ResidueClass l)
-        {
-            return new ResidueClass(l.Value - 1, l.Modulus);
-        }
-
-        public ResidueClass ToThePower(long n)
-        {
-            long result = 1;
-            long currentPower = Value;
-            while (n > 0)
-            {
-                if (n % 2 == 1)
-                {
-                    result = result * currentPower % Modulus;
-                }
-
-                currentPower = currentPower * currentPower % Modulus;
-                n /= 2;
+                result = result * currentPower % Modulus;
             }
 
-            return new ResidueClass(result, Modulus);
+            currentPower = currentPower * currentPower % Modulus;
+            n /= two;
         }
 
-        public ResidueClass Inverse()
+        return new ResidueClass<T>(result, Modulus);
+    }
+
+    public ResidueClass<T> Inverse()
+    {
+        T a = Value;
+        T m = Modulus;
+        T t, q;
+        T x0 = T.Zero;
+        T x1 = T.One;
+        while (a > T.One)
         {
-            long a = Value;
-            long m = Modulus;
-            long t, q;
-            long x0 = 0;
-            long x1 = 1;
-            while (a > 1)
-            {
-                q = a / m;
-                t = m;
-                m = a % m;
-                a = t;
-                t = x0;
-                x0 = x1 - q * x0;
-                x1 = t;
-            }
-
-            return new ResidueClass(x1 < 0 ? x1 + Modulus : x1, Modulus);
+            q = a / m;
+            t = m;
+            m = a % m;
+            a = t;
+            t = x0;
+            x0 = x1 - q * x0;
+            x1 = t;
         }
 
-        public ResidueClass Chinese(ResidueClass other)
+        return new ResidueClass<T>(x1 < T.Zero ? x1 + Modulus : x1, Modulus);
+    }
+
+    public ResidueClass<T> Chinese(ResidueClass<T> other)
+    {
+        var (u, _, gcd) = EulerMath.ExtendedEuclidean(Modulus, other.Modulus);
+        var lcm = Modulus / gcd * other.Modulus;
+        if (Value % gcd != other.Value % gcd)
         {
-            var (u, _, gcd) = EulerMath.ExtendedEuclidean(Modulus, other.Modulus);
-            var lcm = Modulus / gcd * other.Modulus;
-            if (Value % gcd != other.Value % gcd)
-            {
-                throw new ArgumentException("Geen oplossing");
-            }
-
-            var l = (Value - other.Value) / gcd;
-            return new ResidueClass(Value - Modulus*u*l, lcm);
+            throw new ArgumentException("Geen oplossing");
         }
 
-        public override string ToString()
-        {
-            return $"{Value} ({Modulus})";
-        }
+        var l = (Value - other.Value) / gcd;
+        return new ResidueClass<T>(Value - Modulus*u*l, lcm);
+    }
+
+    public bool IsQuadraticResidue()
+    {
+        // Modulus moet priem zijn
+        return Value == T.Zero || ToThePower((Modulus - T.One) / two).Value == T.One;
+    }
+    
+    public override string ToString()
+    {
+        return $"{Value} ({Modulus})";
     }
 }

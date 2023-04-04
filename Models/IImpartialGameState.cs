@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms.Models
+namespace Algorithms.Models;
+
+public interface IImpartialGameState<T> where T : IImpartialGameState<T>
 {
-    public interface IImpartialGameState<T> where T : IImpartialGameState<T>
-    {
-        IEnumerable<IEnumerable<T>> Moves();
-        bool IsBaseLosingPosition();
-    }
+    IEnumerable<IEnumerable<T>> Moves();
+    bool IsBaseLosingPosition();
 }
