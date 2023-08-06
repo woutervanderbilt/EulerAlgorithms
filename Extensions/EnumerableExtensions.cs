@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -74,9 +75,9 @@ public static class EnumerableExtensions
         }
     }
 
-    public static long Product(this IEnumerable<long> list)
+    public static T Product<T>(this IEnumerable<T> list) where T : INumber<T>
     {
-        return list.Aggregate(1l, (a, b) => a * b);
+        return list.Aggregate(T.One, (a, b) => a * b);
     }
 
     public static long Product(this IEnumerable<long> list, long modulus)

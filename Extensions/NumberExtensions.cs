@@ -295,4 +295,6 @@ public static class NumberExtensions
 
         return sb.ToString();
     }
+
+    public static string ToBaseN(this int l, int n) => ((long)l).ToBaseN(n);
 }

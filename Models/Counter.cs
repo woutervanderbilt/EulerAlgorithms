@@ -67,7 +67,7 @@ public class CounterLong<T>
         {
             if (mod.HasValue)
             {
-                counts[t] = counts[t] + c % mod.Value;
+                counts[t] = (counts[t] + c) % mod.Value;
             }
             else
             {

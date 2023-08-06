@@ -55,7 +55,7 @@ public class SquareMatrix<T> : Matrix<T> where T : struct, INumber<T>
 
     public SquareMatrix<T> Inverse()
     {
-        if (Modulus == null)
+        if (typeof(T) == typeof(int) && Modulus == null)
         {
             throw new Exception("Modulus is null");
         }
@@ -77,7 +77,7 @@ public class SquareMatrix<T> : Matrix<T> where T : struct, INumber<T>
         for (int i = 0; i < NumberOfColumns; i++)
         {
             int j = i;
-            while (oldMatrix[i][i] == T.Zero)
+            while (oldMatrix[j][i] == T.Zero)
             {
                 j++;
             }
@@ -151,8 +151,16 @@ public class SquareMatrix<T> : Matrix<T> where T : struct, INumber<T>
             var newMthRow = newMatrix[m];
             for (int i = 0; i < NumberOfColumns; i++)
             {
-                oldMthRow[i] = (oldMthRow[i] + k * oldNthRow[i]) % Modulus.Value;
-                newMthRow[i] = (newMthRow[i] + k * newNthRow[i]) % Modulus.Value;
+                if (Modulus.HasValue)
+                {
+                    oldMthRow[i] = (oldMthRow[i] + k * oldNthRow[i]) % Modulus.Value;
+                    newMthRow[i] = (newMthRow[i] + k * newNthRow[i]) % Modulus.Value;
+                }
+                else
+                {
+                    oldMthRow[i] = (oldMthRow[i] + k * oldNthRow[i]);
+                    newMthRow[i] = (newMthRow[i] + k * newNthRow[i]);
+                }
             }
         }
 
@@ -162,8 +170,16 @@ public class SquareMatrix<T> : Matrix<T> where T : struct, INumber<T>
             var newRow = newMatrix[n];
             for (int c = 0; c < NumberOfColumns; c++)
             {
-                oldRow[c] = oldRow[c] * k % Modulus.Value;
-                newRow[c] = newRow[c] * k % Modulus.Value;
+                if (Modulus.HasValue)
+                {
+                    oldRow[c] = oldRow[c] * k % Modulus.Value;
+                    newRow[c] = newRow[c] * k % Modulus.Value;
+                }
+                else
+                {
+                    oldRow[c] = oldRow[c] * k;
+                    newRow[c] = newRow[c] * k;
+                }
             }
         }
 
