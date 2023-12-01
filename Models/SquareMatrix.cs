@@ -182,7 +182,23 @@ public class SquareMatrix<T> : Matrix<T> where T : struct, INumber<T>
                 }
             }
         }
+    }
 
+    public T Trace()
+    {
+        T res = T.Zero;
+        for (int i = 0; i < NumberOfColumns; i++)
+        {
+            if (Modulus.HasValue)
+            {
+                res = res + this[i, i] % Modulus.Value;
+            }
+            else
+            {
+                res += this[i, i];
+            }
+        }
+        return res;
     }
 
 }
